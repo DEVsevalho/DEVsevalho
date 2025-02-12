@@ -1,11 +1,130 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Simples de Transferencias Bancarias</title>
+    <title>Sistema de Transferência Bancária</title>
 </head>
 <body>
-    
+
+    <h2>BANCO MATHEUS SOARES</h2>
+
+    <!-- Formulário para cadastro de contas -->
+    <h3>Cadastrar Conta</h3>
+    <form id="formCadastro">
+        <label for="numeroConta">Número da Conta:</label>
+        <input type="number" id="numeroConta" required>
+        <br>
+        <label for="nomeTitular">Nome do Titular:</label>
+        <input type="text" id="nomeTitular" required>
+        <br>
+        <label for="saldoInicial">Saldo Inicial:</label>
+        <input type="number" id="saldoInicial" required>
+        <br>
+        <button type="submit">Cadastrar Conta</button>
+    </form>
+
+    <h3>Contas Cadastradas</h3>
+    <button id="btnVisualizar">Visualizar Contas</button>
+    <ul id="listaContas"></ul>
+
+    <h3>Transferir entre Contas</h3>
+    <form id="formTransferencia">
+        <label for="contaOrigem">Conta de Origem (Número):</label>
+        <input type="number" id="contaOrigem" required>
+        <br>
+        <label for="contaDestino">Conta de Destino (Número):</label>
+        <input type="number" id="contaDestino" required>
+        <br>
+        <label for="valorTransferencia">Valor a Transferir:</label>
+        <input type="number" id="valorTransferencia" required>
+        <br>
+        <button type="submit">Transferir</button>
+    </form>
+
+    <script>
+        // Array para armazenar todas as contas cadastradas
+        let contas = [];
+
+        // Função para cadastrar uma nova conta
+        document.getElementById('formCadastro').addEventListener('submit', function(event) {
+            event.preventDefault();  // Impede que o formulário seja enviado da forma tradicional (recarregando a página)
+
+            // Obtém os valores dos campos do formulário
+            const numeroConta = document.getElementById('numeroConta').value;
+            const nomeTitular = document.getElementById('nomeTitular').value;
+            const saldoInicial = parseFloat(document.getElementById('saldoInicial').value);
+
+            // Verifica se o número da conta já existe
+            if (contas.some(conta => conta.numero === numeroConta)) {
+                alert('Número da conta já existe!');  // Exibe uma mensagem de erro caso o número da conta seja duplicado
+                return;  // Retorna para não cadastrar a conta
+            }
+
+            // Cria um objeto de conta com os dados informados
+            const novaConta = {
+                numero: numeroConta,
+                nomeTitular: nomeTitular,
+                saldo: saldoInicial
+            };
+            contas.push(novaConta);  // Adiciona a nova conta ao array de contas
+
+            alert('Conta cadastrada com sucesso!');  // Alerta de sucesso
+            document.getElementById('formCadastro').reset();  // Limpa os campos do formulário
+        });
+
+        // Função para visualizar todas as contas cadastradas
+        document.getElementById('btnVisualizar').addEventListener('click', function() {
+            const listaContas = document.getElementById('listaContas');  // Obtém o elemento de lista
+            listaContas.innerHTML = '';  // Limpa a lista antes de mostrar as contas
+
+            // Verifica se existem contas cadastradas
+            if (contas.length === 0) {
+                listaContas.innerHTML = 'Nenhuma conta cadastrada.';  // Exibe uma mensagem caso não existam contas
+                return;
+            }
+
+            // Para cada conta cadastrada, cria um item de lista para exibir as informações
+            contas.forEach(conta => {
+                const li = document.createElement('li');
+                li.textContent = `Conta: ${conta.numero} | Titular: ${conta.nomeTitular} | Saldo: R$ ${conta.saldo.toFixed(2)}`;
+                listaContas.appendChild(li);  // Adiciona o item à lista de contas
+            });
+        });
+
+        // Função para transferir valores entre contas
+        document.getElementById('formTransferencia').addEventListener('submit', function(event) {
+            event.preventDefault();  // Impede o envio do formulário tradicional
+
+            // Obtém os valores dos campos do formulário de transferência
+            const numeroContaOrigem = document.getElementById('contaOrigem').value;
+            const numeroContaDestino = document.getElementById('contaDestino').value;
+            const valorTransferencia = parseFloat(document.getElementById('valorTransferencia').value);
+
+            // Busca as contas de origem e destino no array de contas
+            const contaOrigem = contas.find(conta => conta.numero === numeroContaOrigem);
+            const contaDestino = contas.find(conta => conta.numero === numeroContaDestino);
+
+            // Verifica se as contas de origem e destino existem
+            if (!contaOrigem || !contaDestino) {
+                alert('Uma das contas não existe.');  // Mensagem de erro caso uma das contas não exista
+                return;
+            }
+
+            // Verifica se a conta de origem tem saldo suficiente para a transferência
+            if (contaOrigem.saldo < valorTransferencia) {
+                alert('Saldo insuficiente na conta de origem.');  // Mensagem de erro caso o saldo seja insuficiente
+                return;
+            }
+
+            // Realiza a transferência
+            contaOrigem.saldo -= valorTransferencia;  // Deduz o valor da conta de origem
+            contaDestino.saldo += valorTransferencia;  // Adiciona o valor à conta de destino
+
+            alert(`Transferência de R$ ${valorTransferencia.toFixed(2)} realizada com sucesso!`);  // Mensagem de sucesso
+            document.getElementById('formTransferencia').reset();  // Limpa os campos do formulário de transferência
+        });
+    </script>
+
 </body>
 </html>
